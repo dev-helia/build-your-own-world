@@ -22,10 +22,21 @@ public class Engine {
         ter.initialize(WIDTH, HEIGHT);
         // Player class.
         Player player = new Player();
-        long seed = player.getUserInputForSeed();
-        WorldGenerator worldGen = new WorldGenerator(WIDTH, HEIGHT, seed);
-        TETile[][] world = worldGen.generateWorld();
-        ter.renderFrame(world);
+        char choice = player.getMainMenuInput();
+        if (choice == 'N') {
+            long seed = player.getUserInputForSeed();
+            WorldGenerator worldGen = new WorldGenerator(WIDTH, HEIGHT, seed);
+            TETile[][] world = worldGen.generateWorld();
+            ter.renderFrame(world);
+            handlePlayerMovement(world); // 进入游戏
+        } else if (choice == 'L') {
+            TETile[][] world = loadWorld();
+            ter.renderFrame(world);
+            handlePlayerMovement(world); // 进入游戏
+        } else if (choice == 'Q') {
+            System.exit(0);
+        }
+    }
     }
 
     /**
