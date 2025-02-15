@@ -135,12 +135,63 @@ public class Engine {
      */
     private void addRoomToWorld(TETile[][] world, Room room) {
         if (room.x + room.width > world.length || room.y + room.height > world[0].length) {
-            return;  // 防止越界
+            return;  // Prevention of transgression.
         }
         for (int x = room.x; x < room.x + room.width; x++) {
             for (int y = room.y; y < room.y + room.height; y++) {
                 world[x][y] = Tileset.FLOOR;
             }
+        }
+    }
+
+    /**
+     *
+     * @param world
+     */
+    private void connectRooms(TETile[][] world) {
+        for (int i = 0; i < rooms.size(); i++) {
+            Room roomA = rooms.get(i);
+            Room roomB = rooms.get(i + 1);
+            // Take the center point of roomA as the starting point of the corridor (startX, startY).
+            int startX = roomA.x + roomA.width / 2;
+            int startY = roomA.y + roomA.height / 2;
+            // Take the center point of roomB as the end point of the corridor (endX, endY).
+            int endX = roomB.x + roomB.width / 2;
+            int endY = roomB.y + roomB.height / 2;
+
+            // First horizontal, then vertical.
+            drawHorizontalHallway(world, startX, endX, startY);
+            drawVerticalHallWay(world, startY, endY, endX);
+        }
+    }
+
+    /**
+     * Draws horizontal corridors on the world map.
+     * @param world A 2D array representing the entire game world.
+     * @param x1 Starting x-coordinate.
+     * @param x2 Terminal X-coordinate (center of another room).
+     * @param y The y-coordinate of the corridor is fixed.
+     */
+    private void drawHorizontalHallway(TETile[][] world, int x1, int x2, int y) {
+        int start = Math.min(x1, x2);
+        int end = Math.max(x1, x2);
+        for (int x = start; x < end; x++) {
+            world[x][y] = Tileset.FLOOR;
+        }
+    }
+
+    /**
+     * Draws vertical corridors on the world map.
+     * @param world A 2D array representing the entire game world.
+     * @param y1 Starting Y coordinate.
+     * @param y2 Terminal Y coordinate (center of another room).
+     * @param x The X-coordinate of the corridor is fixed.
+     */
+    private void drawVerticalHallWay(TETile[][] world, int y1, int y2, int x) {
+        int start = Math.min(y1, y2);
+        int end = Math.max(y1, y2);
+        for (int y = start; y < end; y++) {
+            world[x][y] = Tileset.FLOOR;
         }
     }
 }
