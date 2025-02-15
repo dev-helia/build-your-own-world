@@ -17,13 +17,16 @@ public class Engine {
         ter.initialize(WIDTH, HEIGHT);
         // Player class.
         Menu menu = new Menu();
+        Player player = new Player();
+
         char choice = menu.getMainMenuInput();
         if (choice == 'N') {
             long seed = menu.getUserInputForSeed();
             WorldGenerator worldGen = new WorldGenerator(WIDTH, HEIGHT, seed);
             TETile[][] world = worldGen.generateWorld();
             ter.renderFrame(world);
-            handlePlayerMovement(world);
+            player.move(world);
+            SaveLoad.saveWorld(world);
         } else if (choice == 'L') {
             TETile[][] world = SaveLoad.loadWorld();
             if (world == null) {
