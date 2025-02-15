@@ -1,5 +1,7 @@
 package byow.Core;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import byow.TileEngine.TERenderer;
@@ -11,6 +13,13 @@ public class Engine {
     /* Feel free to change the width and height. */
     public static final int WIDTH = 80;
     public static final int HEIGHT = 30;
+    private static final int MIN_ROOM_SIZE = 3;
+    private static final int MAX_ROOM_SIZE = 8;
+    // Rooms should not be close to the right or top edge of the map.
+    private static final int ROOM_EDGE_MARGIN = 2;
+    // Make sure the room is not attached to the left border or bottom.
+    private static final int ROOM_MIN_OFFSET = 1;
+    private List<Room> rooms;
 
     /**
      * Method used for exploring a fresh world. This method should handle all inputs,
@@ -60,26 +69,78 @@ public class Engine {
     }
 
     /**
+     * Generates a new world based on a given random seed.
+     *  * This method initializes the world as a 2D grid of tiles and ensures all
+     *  * tiles are initially set to `Tileset.NOTHING`. It also initializes the
+     *  * list of rooms that will later be added to the world.
      *
-     * @param seed
-     * @return
+     *
+     * @param seed The random seed used to generate a deterministic world layout.
+     * @return A 2D array of TETile representing the generated world.
      */
     private TETile[][] generateWorld(long seed) {
         Random random = new Random(seed);
         TETile[][] world = new TETile[WIDTH][HEIGHT];
+        rooms = new ArrayList<Room>(); // Initialize the room list.
+        // Initialization: all tiles are NOTHING.
         for (int x = 0; x < WIDTH; x++) {
             for (int y = 0; y < HEIGHT; y++) {
                 world[x][y] = Tileset.NOTHING;
             }
         }
-        // stand by.
-        int roomX = random.nextInt(WIDTH - 5); // 5是什么?
-        int roomY = random.nextInt(HEIGHT - 5); // 5是什么?
-        for (int x = 0; x < WIDTH + 4; x++) {
-            for (int y = 0; y < HEIGHT + 4; y++) {
-                world[x][y] = Tileset.FLOOR;
+
+        // Generate 8-15 rooms randomly.
+        int numRooms = random.nextInt(8) + 8; // 8 + [0,7]，from 8 to 15
+        for (int i = 0; i < numRooms; i++) {
+            // The ROOM width ranges from MIN ROOM SIZE to MAX ROOM SIZE
+            int roomWidth = random.nextInt(MAX_ROOM_SIZE - MIN_ROOM_SIZE) + MIN_ROOM_SIZE;
+            // The ROOM height ranges from MIN ROOM SIZE to MAX ROOM SIZE
+            int roomHeight = random.nextInt(MAX_ROOM_SIZE - MIN_ROOM_SIZE) + MIN_ROOM_SIZE;
+            // Buffer area.
+            int roomX = random.nextInt(WIDTH - roomWidth - ROOM_EDGE_MARGIN)
+                    + ROOM_MIN_OFFSET;
+            // Buffer area.
+            int roomY = random.nextInt(HEIGHT - roomHeight - ROOM_EDGE_MARGIN)
+                    + ROOM_MIN_OFFSET;
+
+            Room newRoom = new Room(roomX, roomY, roomWidth, roomHeight);
+            if (!isOverlapping(newRoom)) {
+                rooms.add(newRoom);
+                addRoomToWorld(world, newRoom);
             }
         }
         return world;
+    }
+
+    /**
+     * Determines if the new room is overlapping the other rooms in the list.
+     *
+     * @param newRoom the target room.
+     * @return true if there is an overlapping, false otherwise.
+     */
+    private boolean isOverlapping(Room newRoom) {
+        for (Room r : rooms) {
+            if (r.intersects(newRoom)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Add a room to the World and fill the floor of the room with Tileset.FLOOR.
+     *
+     * @param world the target world.
+     * @param room the target room.
+     */
+    private void addRoomToWorld(TETile[][] world, Room room) {
+        if (room.x + room.width > world.length || room.y + room.height > world[0].length) {
+            return;  // 防止越界
+        }
+        for (int x = room.x; x < room.x + room.width; x++) {
+            for (int y = room.y; y < room.y + room.height; y++) {
+                world[x][y] = Tileset.FLOOR;
+            }
+        }
     }
 }
