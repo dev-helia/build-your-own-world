@@ -1,12 +1,7 @@
 package byow.Core;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
-import byow.TileEngine.Tileset;
 
 public class Engine {
     TERenderer ter = new TERenderer();
@@ -21,18 +16,20 @@ public class Engine {
     public void interactWithKeyboard() {
         ter.initialize(WIDTH, HEIGHT);
         // Player class.
-        Player player = new Player();
-        char choice = player.getMainMenuInput();
+        Menu menu = new Menu();
+        char choice = menu.getMainMenuInput();
         if (choice == 'N') {
-            long seed = player.getUserInputForSeed();
+            long seed = menu.getUserInputForSeed();
             WorldGenerator worldGen = new WorldGenerator(WIDTH, HEIGHT, seed);
             TETile[][] world = worldGen.generateWorld();
             ter.renderFrame(world);
-            handlePlayerMovement(world); // 进入游戏
+            handlePlayerMovement(world);
         } else if (choice == 'L') {
-            TETile[][] world = loadWorld();
-            ter.renderFrame(world);
-            handlePlayerMovement(world); // 进入游戏
+            TETile[][] world = SaveLoad.loadWorld();
+            if (world == null) {
+                System.out.println("No save file found. Generating new world...");
+                return;
+            }
         } else if (choice == 'Q') {
             System.exit(0);
         }

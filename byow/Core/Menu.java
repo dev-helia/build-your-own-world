@@ -4,7 +4,7 @@ import edu.princeton.cs.introcs.StdDraw;
 /**
  * The player class.
  */
-public class Player {
+public class Menu {
   /**
    * Get the seed from the player.
    * @return the seed String.
